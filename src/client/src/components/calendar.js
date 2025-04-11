@@ -26,9 +26,12 @@ import {
   TextField,
   FormControlLabel,
   Switch,
-  MenuItem
+  MenuItem,
+  IconButton
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { GroupContext } from '../context/groupcontext';
 import { EventContext } from '../context/eventcontext';
 import { AuthContext } from '../context/authcontext';
@@ -246,12 +249,6 @@ const CalendarView = () => {
     setSelectedEvent(null);
   };
 
-  // Check if user can modify the event
-  const canModifyEvent = (event) => {
-    if (!event || !user) return false;
-    return event.createdBy === user._id || event.group.leader === user._id;
-  };
-
   // Custom event component to apply group colors
   const EventComponent = ({ event }) => {
     const { color } = event.resource?.group || { color: theme.palette.primary.main };
@@ -404,6 +401,23 @@ const CalendarView = () => {
             <DialogTitle>
               <Box display="flex" alignItems="center" justifyContent="space-between">
                 <Typography variant="h6">Event Details</Typography>
+                <Box>
+                  <IconButton 
+                    onClick={() => {
+                      setShowEventDetails(false);
+                      setShowEventForm(true);
+                    }}
+                    color="primary"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton 
+                    onClick={() => setShowDeleteConfirm(true)}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
               </Box>
             </DialogTitle>
             <DialogContent dividers>
@@ -439,27 +453,13 @@ const CalendarView = () => {
                   </Typography>
                 </>
               )}
+
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="body2" color="textSecondary">
+                Created by: {selectedEvent.createdBy?.name || selectedEvent.createdBy?.email || "Unknown user"}
+              </Typography>
             </DialogContent>
             <DialogActions>
-              {canModifyEvent(selectedEvent) && (
-                <>
-                  <Button 
-                    color="error" 
-                    onClick={() => setShowDeleteConfirm(true)}
-                  >
-                    Delete
-                  </Button>
-                  <Button 
-                    color="primary" 
-                    onClick={() => {
-                      setShowEventDetails(false);
-                      setShowEventForm(true);
-                    }}
-                  >
-                    Edit
-                  </Button>
-                </>
-              )}
               <Button onClick={handleCloseEventDetails}>Close</Button>
             </DialogActions>
           </>
@@ -574,7 +574,7 @@ const CalendarView = () => {
         <DialogTitle>Delete Event</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete this event? This action cannot be undone.
+            Are you sure you want to delete "{selectedEvent?.title}"? This action cannot be undone.
           </Typography>
         </DialogContent>
         <DialogActions>

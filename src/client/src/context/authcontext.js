@@ -115,16 +115,29 @@ const AuthProvider = ({ children }) => {
         'Content-Type': 'application/json'
       }
     };
-
+  
     try {
       const res = await axios.post('/api/users/login', formData, config);
+      
+      // Set the auth token in headers for subsequent requests
+      setAuthToken(res.data.token);
+      
       dispatch({ type: 'LOGIN_SUCCESS', payload: res.data });
-      loadUser();
+      
+      // Load the user data after successful login
+      try {
+        await loadUser();
+      } catch (loadErr) {
+        console.error('Error loading user after login:', loadErr);
+      }
+      
+      return { success: true };
     } catch (err) {
       dispatch({
         type: 'LOGIN_FAIL',
         payload: err.response?.data?.msg || 'Login failed'
       });
+      return { success: false, error: err.response?.data?.msg || 'Login failed' };
     }
   };
 
