@@ -4,7 +4,6 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import Register from './components/register';
 import Login from './components/login';
-import Dashboard from './components/dashboard';
 import Profile from './components/profile';
 import GroupDetail from './components/groupdetail';
 import CalendarView from './components/calendar';
@@ -33,17 +32,9 @@ function App() {
         <EventProvider>
           <Router>
             <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" />} />
+              <Route path="/" element={<Navigate to="/calendar" />} />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <><Navbar /><Dashboard /></>
-                  </ProtectedRoute>
-                }
-              />
               <Route
                 path="/profile"
                 element={

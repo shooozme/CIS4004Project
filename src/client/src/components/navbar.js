@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useContext, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -9,18 +9,23 @@ import {
   IconButton,
   Avatar,
   Menu,
-  MenuItem,
-  Tabs,
-  Tab
+  MenuItem
 } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { AuthContext } from '../context/authcontext';
 
 const Navbar = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, user, logout } = useContext(AuthContext);
+  const { isAuthenticated, user, logout, loadUser } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  
+  // Check authentication status on component mount
+  useEffect(() => {
+    // If token exists but user isn't loaded yet, load the user
+    if (localStorage.getItem('token') && !user) {
+      loadUser();
+    }
+  }, []);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -41,93 +46,79 @@ const Navbar = () => {
     navigate('/profile');
   };
 
-  // Determine active tab based on current path
-  const getActiveTab = () => {
-    const path = location.pathname;
-    if (path === '/dashboard' || path === '/calendar') return 0;
-    if (path === '/profile') return 1;
-    // For group details pages
-    if (path.startsWith('/groups/')) return 1;
-    return false;
+  const handleCalendarClick = () => {
+    navigate('/calendar');
   };
 
-  const handleTabChange = (event, newValue) => {
-    if (newValue === 0) navigate('/calendar');
-    if (newValue === 1) navigate('/profile');
+  // Determine authentication status - check both context state and localStorage
+  const checkIsAuthenticated = () => {
+    return isAuthenticated || localStorage.getItem('token') !== null;
   };
-
+  
   return (
     <AppBar position="static">
       <Toolbar>
-        <CalendarTodayIcon sx={{ mr: 2 }} />
+        <IconButton 
+          color="inherit" 
+          onClick={handleCalendarClick}
+          sx={{ mr: 1 }}
+        >
+          <CalendarTodayIcon />
+        </IconButton>
         <Typography 
           variant="h6" 
           component={Link} 
-          to="/" 
+          to="/calendar" 
           sx={{ 
             flexGrow: 1, 
             textDecoration: 'none', 
             color: 'inherit',
-            display: { xs: 'none', sm: 'block' }
+            cursor: 'pointer'
           }}
         >
           Calendar App
         </Typography>
 
-        {isAuthenticated ? (
-          <>
-            <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
-              <Tabs 
-                value={getActiveTab()} 
-                onChange={handleTabChange}
-                textColor="inherit"
-                indicatorColor="secondary"
-              >
-                <Tab label="Calendar" />
-                <Tab label="Profile" />
-              </Tabs>
-            </Box>
-            
-            <Box>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <Avatar 
-                  sx={{ 
-                    width: 32, 
-                    height: 32,
-                    bgcolor: 'primary.dark',
-                    fontSize: '1rem'
-                  }}
-                >
-                  {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                </Avatar>
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
+        {checkIsAuthenticated() ? (
+          <Box>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleMenu}
+              color="inherit"
+            >
+              <Avatar 
+                sx={{ 
+                  width: 32, 
+                  height: 32,
+                  bgcolor: 'primary.dark',
+                  fontSize: '1rem'
                 }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
               >
-                <MenuItem onClick={handleProfile}>Profile</MenuItem>
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
-              </Menu>
-            </Box>
-          </>
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </Avatar>
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              <MenuItem onClick={handleProfile}>Profile</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            </Menu>
+          </Box>
         ) : (
           <Box>
             <Button 

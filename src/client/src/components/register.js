@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -11,9 +11,11 @@ import {
   Alert,
   Paper
 } from '@mui/material';
+import { AuthContext } from '../context/authcontext';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { register } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -54,20 +56,11 @@ const Register = () => {
     try {
       setLoading(true);
       
-      const config = {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      };
-
-      const body = JSON.stringify({ name, email, password });
-      const res = await axios.post('/api/users/register', body, config);
+      // Use the register function from AuthContext
+      await register({ name, email, password });
       
-      // Save token to localStorage
-      localStorage.setItem('token', res.data.token);
-      
-      // Redirect to dashboard
-      navigate('/dashboard');
+      // Redirect to calendar view
+      navigate('/calendar');
     } catch (err) {
       setError(err.response?.data?.msg || 'Registration failed');
       setLoading(false);

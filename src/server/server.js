@@ -6,7 +6,7 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// This is middleware. Middleware is like a filter that processes requests before they reach your route handlers.
+// This is middleware. Middleware is like a filter that processes requests before they reach the route handlers.
 app.use(cors());
 app.use(express.json());
 
@@ -20,8 +20,8 @@ mongoose
 app.get('/', (req, res) => {
   res.send('Calendar API is running. Use /api/users or /api/events to access the API endpoints.');
 });
-app.use('/api/users', require('./routes/users'));
-app.use('/api/groups', require('./routes/groups'));
-app.use('/api/events', require('./routes/events'));
+app.use('/api/users', require('./src/routes/users'));
+app.use('/api/groups', require('./src/routes/groups'));
+app.use('/api/events', require('./src/routes/events'));
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

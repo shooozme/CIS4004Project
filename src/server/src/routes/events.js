@@ -172,7 +172,7 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ msg: 'Event not found' });
     }
     
-    // Check if user is a member of the group or the creator of the event
+    // Check if user is a member of the group
     const group = await Group.findById(event.group);
     
     if (!group) {
@@ -183,17 +183,8 @@ router.delete('/:id', auth, async (req, res) => {
       member => member.user && member.user.toString() === req.user.id
     );
     
-    const isCreator = event.createdBy.toString() === req.user.id;
-    
     if (!isMember) {
       return res.status(401).json({ msg: 'User not authorized to delete events for this group' });
-    }
-    
-    // Allow the event creator or group leader to delete events
-    const isGroupLeader = group.leader.toString() === req.user.id;
-    
-    if (!isCreator && !isGroupLeader) {
-      return res.status(401).json({ msg: 'Only the event creator or group leader can delete this event' });
     }
     
     await Event.findByIdAndRemove(req.params.id);

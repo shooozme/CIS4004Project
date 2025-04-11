@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -11,9 +11,11 @@ import {
   Alert,
   Paper
 } from '@mui/material';
+import { AuthContext } from '../context/authcontext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -42,20 +44,12 @@ const Login = () => {
     try {
       setLoading(true);
       
-      const config = {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      };
-
-      const body = JSON.stringify({ email, password });
-      const res = await axios.post('/api/users/login', body, config);
+      // Use the login function from AuthContext instead of directly making the API call
+      // This ensures the auth state is properly updated in the context
+      await login({ email, password });
       
-      // Save token to localStorage
-      localStorage.setItem('token', res.data.token);
-      
-      // Redirect to dashboard
-      navigate('/dashboard');
+      // Redirect to calendar view
+      navigate('/calendar');
     } catch (err) {
       setError(err.response?.data?.msg || 'Login failed');
       setLoading(false);

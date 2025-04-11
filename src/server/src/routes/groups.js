@@ -22,7 +22,7 @@ router.post('/', auth, async (req, res) => {
       members: [{ user: req.user.id, email: user.email, name: user.name }]
     });
 
-    // Save the group
+    // Save the group to database
     const group = await newGroup.save();
 
     // Add the group to the user's groups
